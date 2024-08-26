@@ -3,9 +3,10 @@ package handler
 import (
 	"booking-website-be/model"
 	repo "booking-website-be/repository"
-	"booking-website-be/secure"
+	"booking-website-be/security"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,7 +24,7 @@ func (u *CustomerHandler) SaveAccount(ctx echo.Context) error {
 		})
 	}
 
-	hashedPassword, err := secure.HashPassword(req.Password)
+	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "error in hashing password",
@@ -53,6 +54,7 @@ func (u *CustomerHandler) SaveAccount(ctx echo.Context) error {
 
 func (u *CustomerHandler) CheckLogin(ctx echo.Context) error {
 	req := model.SignIn{}
+	cookie := new(http.Cookie)
 
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
@@ -74,22 +76,36 @@ func (u *CustomerHandler) CheckLogin(ctx echo.Context) error {
 		})
 	}
 
-	if !secure.CheckPassword(data.Password, req.Password) {
+	if !security.CheckPassword(data.Password, req.Password) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
 			"message": "invalid credentials",
 		})
 	}
 
-	token, err := generateJWTToken(data)
+	token, err := security.GenerateJWTToken(data)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "error generating token",
 		})
 	}
 
+	cookie.Name = "token"
+	cookie.Value = token
+	cookie.Path = "/"
+	cookie.HttpOnly = true                          // Prevent JavaScript access
+	cookie.Secure = true                            // Use HTTPS
+	cookie.Expires = time.Now().Add(24 * time.Hour) // Set expiration
+	ctx.SetCookie(cookie)
+
 	return ctx.JSON(http.StatusOK, echo.Map{
 		"message": "login successful",
+		"data":    data,
 		"token":   token,
 	})
+}
 
+func (u CustomerHandler) Home(ctx echo.Context) error {
+	return ctx.JSON(http.StatusAccepted, echo.Map{
+		"message":"succesful",
+	})
 }

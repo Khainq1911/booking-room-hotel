@@ -10,6 +10,8 @@ type SaveAccount struct {
 }
 
 type SignIn struct {
+	User_id  int    `json:"user_id" db:"user_id"`
 	Phone    string `json:"phone" db:"phone"`
 	Password string `json:"password" db:"password"`
+	Role     string
 }

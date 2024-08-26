@@ -31,7 +31,7 @@ func (db *CustomerRepo) SaveAccountRepo(account model.SaveAccount, ctx context.C
 
 func (db *CustomerRepo) CheckSignInRepo(ctx context.Context, userName string) (model.SignIn, error) {
 	user := model.SignIn{}
-	query := "SELECT phone, password FROM Users WHERE phone = $1"
+	query := "SELECT phone, password, role, user_id FROM Users WHERE phone = $1"
 
 	if err := db.sql.Db.Get(&user, query, userName); err != nil {
 		fmt.Println("error in select user signIn:", err)
