@@ -19,6 +19,7 @@ func (api *Api) SetupRouter() {
 	/* protected.Use(middleware.AuthenticateMiddleware) */
 	api.Echo.GET("/", api.CustomerHandler.GetAllRoom)
 	api.Echo.GET("/room", api.CustomerHandler.SelectRoom)
+	api.Echo.POST("/booking", api.CustomerHandler.BookingRoom)
 
 	api.Echo.POST("/admin/addRoom", api.AdminHandler.AddInforRoomHandler)
 }

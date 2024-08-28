@@ -5,6 +5,7 @@ import (
 	"booking-website-be/model"
 	"context"
 	"fmt"
+	"time"
 )
 
 type CustomerRepo interface {
@@ -12,6 +13,7 @@ type CustomerRepo interface {
 	CheckSignInRepo(ctx context.Context, userName string) (model.SignIn, error)
 	GetAllRoomRepo(ctx context.Context) ([]model.Room, error)
 	SelectRoomRepo(ctx context.Context, room_id int) ([]model.Room, error)
+	BookingRoomRepo(ctx context.Context, booking model.BookingRoom) (model.BookingRoom, error)
 }
 
 type CustomerRepoDb struct {
@@ -69,4 +71,26 @@ func (db *CustomerRepoDb) SelectRoomRepo(ctx context.Context, room_id int) ([]mo
 	}
 
 	return data, nil
+}
+
+func (db *CustomerRepoDb) BookingRoomRepo(ctx context.Context, booking model.BookingRoom) (model.BookingRoom, error) {
+	query := `insert into bookings(room_id, user_id, check_in_date, check_out_date, total_price, booking_status) 
+			values ($1, $2, $3, $4, $5, $6)`
+
+	checkInDate := time.Now()
+	checkInOut := time.Now()
+
+	_, err := db.sql.Db.Exec(query,
+		booking.Room_id,
+		booking.User_id,
+		checkInDate,
+		checkInOut,
+		booking.TotalPrice,
+		booking.BookingStatus)
+	if err != nil {
+		fmt.Println("failed to insert data to database at BookingRoomRepo")
+		return model.BookingRoom{}, err
+	}
+
+	return booking, nil
 }

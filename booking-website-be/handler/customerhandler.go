@@ -143,3 +143,30 @@ func (u CustomerHandler) SelectRoom(ctx echo.Context) error {
 		"data":    data,
 	})
 }
+
+func (u CustomerHandler) BookingRoom(ctx echo.Context) error {
+	data := model.BookingRoom{}
+
+	if err := ctx.Bind(&data); err != nil {
+		return ctx.JSON(http.StatusBadRequest, model.Response{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to bind data",
+			Data:       nil,
+		})
+	}
+
+	_, err := u.Repo.BookingRoomRepo(ctx.Request().Context(), data)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, model.Response{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to booking room",
+			Data:       nil,
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, model.Response{
+		StatusCode: http.StatusOK,
+		Message:    "Booking successfully",
+		Data:       data,
+	})
+}
