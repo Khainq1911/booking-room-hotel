@@ -3,7 +3,8 @@ package main
 import (
 	"booking-website-be/database"
 	"booking-website-be/handler"
-	repoimplement "booking-website-be/repository/repo-implement"
+	"booking-website-be/repository"
+
 	"booking-website-be/router"
 
 	"github.com/labstack/echo/v4"
@@ -23,13 +24,17 @@ func main() {
 
 	e := echo.New()
 
-	db := handler.CustomerHandler{
-		Repo: repoimplement.NewCustomerRepo(sql),
+	CustomerDb := handler.CustomerHandler{
+		Repo: repository.NewCustomerRepo(sql),
+	}
+	AdminDb := handler.AdminHandler{
+		Repo: repository.NewAdminRepo(sql),
 	}
 
 	api := router.Api{
 		Echo:    e,
-		Handler: db,
+		CustomerHandler: CustomerDb,
+		AdminHandler: AdminDb,
 	}
 
 	api.SetupRouter()
