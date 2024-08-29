@@ -9,6 +9,9 @@ import (
 
 type AdminRepo interface {
 	AddInforRoom(ctx context.Context, infor model.Room) (model.Room, error)
+	GetBookingsListRepo(ctx context.Context) ([]model.BookingList, error)
+	GetDetailBookingRepo(ctx context.Context, booking_id int) ([]model.BookingList, error)
+	CancelBookingRepo(ctx context.Context, booking_id int) error
 }
 
 type AdminRepoDb struct {
@@ -31,3 +34,56 @@ func (db *AdminRepoDb) AddInforRoom(ctx context.Context, infor model.Room) (mode
 
 	return infor, nil
 }
+
+func (db *AdminRepoDb) GetBookingsListRepo(ctx context.Context) ([]model.BookingList, error) {
+	data := []model.BookingList{}
+	query := `select * from bookings`
+
+	if err := db.Sql.Db.Select(&data, query); err != nil {
+		fmt.Println("failed to get booking list(GetBookingsListRepo)")
+		return []model.BookingList{}, err
+	}
+
+	return data, nil
+}
+
+func (db *AdminRepoDb) GetDetailBookingRepo(ctx context.Context, booking_id int) ([]model.BookingList, error) {
+	data := []model.BookingList{}
+
+	query := `select * from bookings where booking_id = $1`
+	if err := db.Sql.Db.Select(&data, query, booking_id); err != nil {
+		fmt.Println("failed to get booking with id", booking_id, err)
+		return []model.BookingList{}, err
+	}
+
+	return data, nil
+}
+
+func (db *AdminRepoDb) CancelBookingRepo(ctx context.Context, booking_id int) error {
+	query := `update bookings set booking_status = 'canceled' where booking_id = $1`
+
+	_, err := db.Sql.Db.Exec(query, booking_id)
+	if err != nil {
+		fmt.Println("failed to update in database (CancelBookingRepo)", err)
+		return err
+	}
+	
+	return nil
+}
+
+/*
+User Authentication:
+POST /register: Đăng ký người dùng mới. (done)
+POST /login: Đăng nhập và nhận token xác thực. (done)
+Room Management:
+GET /rooms: Lấy danh sách các phòng. (done)
+GET /rooms/:id: Lấy chi tiết thông tin phòng theo ID. (done)
+Booking Management:
+POST /bookings: Tạo mới một booking. (done)
+GET /bookings: Lấy danh sách các booking của người dùng.(done)
+GET /bookings/:id: Lấy chi tiết một booking.(done)
+PUT /bookings/:id/cancel: Hủy một booking. (done)
+Payment Management (tuỳ chọn):
+POST /payments: Xử lý thanh toán.
+GET /payments/:id: Lấy chi tiết thanh toán.
+*/

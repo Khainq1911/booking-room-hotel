@@ -22,4 +22,7 @@ func (api *Api) SetupRouter() {
 	api.Echo.POST("/booking", api.CustomerHandler.BookingRoom)
 
 	api.Echo.POST("/admin/addRoom", api.AdminHandler.AddInforRoomHandler)
+	api.Echo.GET("/admin/bookings_list", api.AdminHandler.GetBookingList)
+	api.Echo.GET("/admin/bookings_list", api.AdminHandler.GetDetailBooking)
+	api.Echo.PUT("/admin/bookings_list/cancel", api.AdminHandler.CancelBooking)
 }
