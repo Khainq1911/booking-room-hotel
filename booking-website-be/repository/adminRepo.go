@@ -12,6 +12,8 @@ type AdminRepo interface {
 	GetBookingsListRepo(ctx context.Context) ([]model.BookingList, error)
 	GetDetailBookingRepo(ctx context.Context, booking_id int) ([]model.BookingList, error)
 	CancelBookingRepo(ctx context.Context, booking_id int) error
+	DeleteRoomRepo(ctx context.Context, room_id int) error
+	UpdateRoomInforRepo(ctx context.Context, room_id int, room model.RoomUpdate) error
 }
 
 type AdminRepoDb struct {
@@ -67,7 +69,40 @@ func (db *AdminRepoDb) CancelBookingRepo(ctx context.Context, booking_id int) er
 		fmt.Println("failed to update in database (CancelBookingRepo)", err)
 		return err
 	}
-	
+
+	return nil
+}
+
+func (db *AdminRepoDb) DeleteRoomRepo(ctx context.Context, room_id int) error {
+
+	query := `delete from rooms where room_id = $1`
+
+	if _, err := db.Sql.Db.Exec(query, room_id); err != nil {
+		fmt.Println("failed to delete room from database", err)
+		return err
+
+	}
+
+	return nil
+}
+
+func (db *AdminRepoDb) UpdateRoomInforRepo(ctx context.Context, room_id int, room model.RoomUpdate) error {
+
+	query := `update rooms 
+			set 
+			room_type = $1,
+			description = $2,
+			price = $3,
+			room_status = $4,
+			max_guest = $5,
+			image_url = $6
+			where room_id = $7 is not null
+			`
+	if _, err := db.Sql.Db.Exec(query, room.Room_type, room.Description, room.Price, room.Room_status, room.Max_guest, room.Image_url, room_id); err != nil{
+		fmt.Println("failed to update room information.", err)
+		return err
+	}
+
 	return nil
 }
 
@@ -87,3 +122,6 @@ Payment Management (tuỳ chọn):
 POST /payments: Xử lý thanh toán.
 GET /payments/:id: Lấy chi tiết thanh toán.
 */
+/*
+PUT /api/admin/rooms/:id (admin)
+DELETE /api/admin/rooms/:id (admin) */

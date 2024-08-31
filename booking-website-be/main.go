@@ -31,10 +31,14 @@ func main() {
 		Repo: repository.NewAdminRepo(sql),
 	}
 
+	Authen := handler.AuthenHandler{
+		Repo: repository.NewAuthenticationRepo(sql),
+	}
 	api := router.Api{
-		Echo:    e,
+		Echo:            e,
 		CustomerHandler: CustomerDb,
-		AdminHandler: AdminDb,
+		AdminHandler:    AdminDb,
+		AuthenHandler:   Authen,
 	}
 
 	api.SetupRouter()

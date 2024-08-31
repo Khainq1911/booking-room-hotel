@@ -121,3 +121,62 @@ func (u *AdminHandler) CancelBooking(ctx echo.Context) error {
 		Data:       data,
 	})
 }
+
+func (u *AdminHandler) DeleteRoom(ctx echo.Context) error {
+	room_id, err := strconv.Atoi(ctx.Param("room_id"))
+	if err != nil {
+		fmt.Println("failed to get room_id")
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to get room_id",
+		})
+	}
+
+	if err := u.Repo.DeleteRoomRepo(ctx.Request().Context(), room_id); err != nil {
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to delete rooms",
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, model.ResWithOutData{
+		StatusCode: http.StatusOK,
+		Message:    "successful",
+	})
+}
+
+func (u *AdminHandler) UpdateRoom(ctx echo.Context) error {
+	data := model.RoomUpdate{}
+
+	room_id, err := strconv.Atoi(ctx.Param("room_id"))
+	if err != nil {
+		fmt.Println("failed to get room_id")
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to get room_id",
+		})
+	}
+
+	if err := ctx.Bind(&data); err != nil {
+		fmt.Println("failed to bind data")
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to bind data",
+		})
+	}
+
+	if err := u.Repo.UpdateRoomInforRepo(ctx.Request().Context(), room_id, data); err != nil {
+
+		fmt.Println(err)
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to update",
+		})
+
+	}
+	fmt.Println(data, room_id)
+	return ctx.JSON(http.StatusOK, model.ResWithOutData{
+		StatusCode: http.StatusOK,
+		Message:    "successful",
+	})
+}
