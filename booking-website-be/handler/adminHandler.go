@@ -174,7 +174,40 @@ func (u *AdminHandler) UpdateRoom(ctx echo.Context) error {
 		})
 
 	}
-	fmt.Println(data, room_id)
+
+	return ctx.JSON(http.StatusOK, model.ResWithOutData{
+		StatusCode: http.StatusOK,
+		Message:    "successful",
+	})
+}
+
+func (u *AdminHandler) UpdateBooking(ctx echo.Context) error {
+	booking_id, err := strconv.Atoi(ctx.Param("booking_id"))
+	if err != nil {
+		fmt.Println("failed to get booking_id")
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to get booking_id",
+		})
+	}
+
+	data := model.BookingUpdate{}
+	if err := ctx.Bind(&data); err != nil {
+		fmt.Println("failed to bind data")
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to bind data",
+		})
+	}
+
+	if err := u.Repo.UpdateBookingRepo(ctx.Request().Context(), booking_id, data); err != nil {
+		fmt.Println("failed to update booking handler")
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to update booking",
+		})
+	}
+
 	return ctx.JSON(http.StatusOK, model.ResWithOutData{
 		StatusCode: http.StatusOK,
 		Message:    "successful",

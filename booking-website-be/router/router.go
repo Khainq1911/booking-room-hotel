@@ -32,4 +32,5 @@ func (api *Api) SetupRouter() {
 	api.Echo.PUT("/admin/bookings_list/cancel", api.AdminHandler.CancelBooking)
 	api.Echo.DELETE("/admin/rooms/:room_id/delete", api.AdminHandler.DeleteRoom)
 	api.Echo.PUT("/admin/rooms/:room_id/update", api.AdminHandler.UpdateRoom)
+	api.Echo.PUT("/admin/bookings/:booking_id/update", api.AdminHandler.UpdateBooking)
 }

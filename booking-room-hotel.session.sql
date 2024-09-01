@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS Rooms (
     price INT NOT NULL,
     room_status BOOLEAN,
     max_guest INT NOT NULL
+    image_url VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS Bookings (
