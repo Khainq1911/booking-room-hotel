@@ -5,6 +5,7 @@ import (
 	"booking-website-be/model"
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -12,6 +13,7 @@ type CustomerRepo interface {
 	GetAllRoomRepo(ctx context.Context) ([]model.Room, error)
 	SelectRoomRepo(ctx context.Context, room_id int) ([]model.Room, error)
 	BookingRoomRepo(ctx context.Context, booking model.BookingRoom) (model.BookingRoom, error)
+	FilterRoomRepo(ctx context.Context, room_type string, max_guest string, timeIn string, timeOut string) ([]model.Room, error)
 }
 
 type CustomerRepoDb struct {
@@ -69,4 +71,39 @@ func (db *CustomerRepoDb) BookingRoomRepo(ctx context.Context, booking model.Boo
 	}
 
 	return booking, nil
+}
+
+func (db *CustomerRepoDb) FilterRoomRepo(ctx context.Context, room_type string, max_guest string, timeIn string, timeOut string) ([]model.Room, error) {
+	var rooms []model.Room
+	num := 1
+	query := `SELECT * FROM rooms WHERE 1=1`
+	params := []interface{}{}
+
+	if room_type != "all" && room_type != ""{
+		query += (` AND room_type = $` + strconv.Itoa(num))
+		params = append(params, room_type)
+		num += 1
+	}
+
+	if max_guest != "all" &&  max_guest != "" {
+		query += (` AND max_guest <= $` + strconv.Itoa(num))
+		params = append(params, max_guest)
+		num += 1
+	}
+
+	if timeIn != "all" && timeOut != "all" && timeIn != "" && timeOut != "" {
+		query += ` AND room_id NOT IN (
+			SELECT room_id FROM bookings 
+			WHERE ($` + strconv.Itoa(num) + ` <= check_out_date AND $` + strconv.Itoa(num+1) + ` >= check_in_date)
+		)`
+		params = append(params, timeOut, timeIn)
+		num += 2
+	}
+
+	if err := db.sql.Db.Select(&rooms, query, params...); err != nil {
+		fmt.Println("Failed to filter data", err)
+		return nil, err
+	}
+
+	return rooms, nil
 }

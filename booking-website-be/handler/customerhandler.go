@@ -79,3 +79,25 @@ func (u CustomerHandler) BookingRoom(ctx echo.Context) error {
 		Data:       data,
 	})
 }
+
+func (u CustomerHandler) FilterRoom(ctx echo.Context) error {
+	room_type := ctx.QueryParam("room_type")
+	max_guest := ctx.QueryParam("max_guest")
+	timeIn := ctx.QueryParam("check_in_date")
+	timeOut := ctx.QueryParam("check_out_date")
+
+	result, err := u.Repo.FilterRoomRepo(ctx.Request().Context(), room_type, max_guest, timeIn, timeOut)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, model.Response{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to filter data",
+			Data:       nil,
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, model.Response{
+		StatusCode: http.StatusOK,
+		Message:    "succesful",
+		Data:       result,
+	})
+}

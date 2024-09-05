@@ -20,6 +20,7 @@ func (api *Api) SetupRouter() {
 	api.Echo.POST("/login", api.AuthenHandler.CheckLogin)
 	api.Echo.GET("/rooms", api.CustomerHandler.GetAllRoom)
 	api.Echo.GET("/room", api.CustomerHandler.SelectRoom)
+	api.Echo.GET("/filter", api.CustomerHandler.FilterRoom)
 	/* protected := api.Echo.Group("/") */
 	/* protected.Use(middleware.AuthenticateMiddleware) */
 

@@ -9,13 +9,15 @@ import (
 )
 
 type AdminRepo interface {
+	// rooms
 	AddInforRoom(ctx context.Context, infor model.Room) (model.Room, error)
-	GetBookingsListRepo(ctx context.Context) ([]model.BookingList, error)
-	GetDetailBookingRepo(ctx context.Context, booking_id int) ([]model.BookingList, error)
-	CancelBookingRepo(ctx context.Context, booking_id int) error
 	DeleteRoomRepo(ctx context.Context, room_id int) error
 	UpdateRoomInforRepo(ctx context.Context, room_id int, room model.RoomUpdate) error
+	// bookings
+	GetBookingsListRepo(ctx context.Context) ([]model.BookingList, error)
+	GetDetailBookingRepo(ctx context.Context, booking_id int) ([]model.BookingList, error)
 	UpdateBookingRepo(ctx context.Context, booking_id int, data model.BookingUpdate) error
+	CancelBookingRepo(ctx context.Context, booking_id int) error
 }
 
 type AdminRepoDb struct {
