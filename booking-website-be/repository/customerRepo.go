@@ -79,13 +79,13 @@ func (db *CustomerRepoDb) FilterRoomRepo(ctx context.Context, room_type string, 
 	query := `SELECT * FROM rooms WHERE 1=1`
 	params := []interface{}{}
 
-	if room_type != "all" && room_type != ""{
+	if room_type != "all" && room_type != "" {
 		query += (` AND room_type = $` + strconv.Itoa(num))
 		params = append(params, room_type)
 		num += 1
 	}
 
-	if max_guest != "all" &&  max_guest != "" {
+	if max_guest != "all" && max_guest != "" {
 		query += (` AND max_guest <= $` + strconv.Itoa(num))
 		params = append(params, max_guest)
 		num += 1
