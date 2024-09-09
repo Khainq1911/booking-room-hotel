@@ -13,5 +13,10 @@ type SignIn struct {
 	User_id  int    `json:"user_id" db:"user_id"`
 	Phone    string `json:"phone" db:"phone"`
 	Password string `json:"password" db:"password"`
-	Role     string
+	Role     string `json:"role" db:"role"`
+}
+
+type Request struct {
+	Phone    string `json:"phone" db:"phone"`
+	Password string `json:"password" db:"password"`
 }

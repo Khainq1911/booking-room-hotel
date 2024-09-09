@@ -8,6 +8,7 @@ import (
 	"booking-website-be/router"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 )
 
@@ -23,7 +24,8 @@ func main() {
 	defer sql.Close()
 
 	e := echo.New()
-
+	e.Use(middleware.CORS())
+	
 	CustomerDb := handler.CustomerHandler{
 		Repo: repository.NewCustomerRepo(sql),
 	}

@@ -4,7 +4,6 @@ import (
 	"booking-website-be/model"
 	"booking-website-be/repository"
 	"booking-website-be/security"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -53,8 +52,8 @@ func (u *AuthenHandler) SaveAccount(ctx echo.Context) error {
 }
 
 func (u *AuthenHandler) CheckLogin(ctx echo.Context) error {
-	req := model.SignIn{}
-	cookie := new(http.Cookie)
+	req := model.Request{}
+	
 
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
@@ -62,7 +61,7 @@ func (u *AuthenHandler) CheckLogin(ctx echo.Context) error {
 		})
 	}
 
-	fmt.Println(req)
+
 
 	data, err := u.Repo.CheckSignInRepo(ctx.Request().Context(), req.Phone)
 	if err != nil {
@@ -89,12 +88,14 @@ func (u *AuthenHandler) CheckLogin(ctx echo.Context) error {
 		})
 	}
 
+	
+	cookie := new(http.Cookie) 
 	cookie.Name = "token"
 	cookie.Value = token
 	cookie.Path = "/"
-	cookie.HttpOnly = true                          // Prevent JavaScript access
-	cookie.Secure = true                            // Use HTTPS
-	cookie.Expires = time.Now().Add(24 * time.Hour) // Set expiration
+	cookie.HttpOnly = true                          
+	cookie.Secure = true                           
+	cookie.Expires = time.Now().Add(24 * time.Hour) 
 	ctx.SetCookie(cookie)
 
 	return ctx.JSON(http.StatusOK, echo.Map{
