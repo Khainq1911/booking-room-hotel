@@ -10,28 +10,16 @@ type Api struct {
 	Echo            *echo.Echo
 	CustomerHandler handler.CustomerHandler
 	AdminHandler    handler.AdminHandler
-	AuthenHandler   handler.AuthenHandler
+	AccountHandler  handler.AccountHandler
 }
 
 func (api *Api) SetupRouter() {
 
-	//public routes
-	api.Echo.POST("/register", api.AuthenHandler.SaveAccount)
-	api.Echo.POST("/login", api.AuthenHandler.CheckLogin)
-	api.Echo.GET("/rooms", api.CustomerHandler.GetAllRoom)
-	api.Echo.GET("/rooms", api.CustomerHandler.SelectRoom)
-	api.Echo.GET("/filter", api.CustomerHandler.FilterRoom)
-	/* protected := api.Echo.Group("/") */
-	/* protected.Use(middleware.AuthenticateMiddleware) */
+	api.Echo.POST("customer/create", api.AccountHandler.CreateCustomer)
+	api.Echo.GET("customers", api.AccountHandler.ViewCusList)
+	api.Echo.GET("customers/:customer_id", api.AccountHandler.ViewCusDetail)
+	api.Echo.PUT("customers/update/:customer_id", api.AccountHandler.UpdateCus)
+	api.Echo.PUT("customers/delete/:customer_id", api.AccountHandler.DeleteCus)
 
-	api.Echo.POST("/booking", api.CustomerHandler.BookingRoom)
-
-	// admin routes
-	api.Echo.POST("/admin/addRoom", api.AdminHandler.AddInforRoomHandler)
-	api.Echo.GET("/admin/bookings_list", api.AdminHandler.GetBookingList)
-	api.Echo.GET("/admin/bookings_list", api.AdminHandler.GetDetailBooking)
-	api.Echo.PUT("/admin/bookings_list/cancel", api.AdminHandler.CancelBooking)
-	api.Echo.DELETE("/admin/rooms/:room_id/delete", api.AdminHandler.DeleteRoom)
-	api.Echo.PUT("/admin/rooms/:room_id/update", api.AdminHandler.UpdateRoom)
-	api.Echo.PUT("/admin/bookings/:booking_id/update", api.AdminHandler.UpdateBooking)
+	api.Echo.POST("employee/create", api.AccountHandler.CreateEmployee)
 }

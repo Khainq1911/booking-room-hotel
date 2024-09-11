@@ -1,61 +1,164 @@
-CREATE TABLE IF NOT EXISTS Users (
-    user_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    dob DATE,
-    phone VARCHAR(20) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(50),
-    role VARCHAR(20) DEFAULT 'customer',
-    createAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updateAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE TypeRoom (
+    type_id uuid PRIMARY KEY,
+    type_name varchar(50) NOT NULL,
+    description text, 
+    price_per_night decimal(10, 2) NOT NULL,
+    max_occupancy int NOT NULL,
+    room_size decimal(5, 2),
+    image_url varchar(255),
+    status varchar(20) DEFAULT 'active',
+    discount decimal(5, 2) DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS Rooms (
-    room_id SERIAL PRIMARY KEY,
-    room_type VARCHAR(20),
-    description TEXT,
-    price INT NOT NULL,
-    room_status BOOLEAN,
-    max_guest INT NOT NULL
-    image_url VARCHAR(255)
+CREATE TABLE Room (
+    room_id uuid PRIMARY KEY,
+    room_name varchar(50) NOT NULL,
+    type_id uuid REFERENCES TypeRoom(type_id),  
+    floor int NOT NULL,
+    status varchar(20) DEFAULT 'available',
+    price_override decimal(10, 2),
+    cleaning_status varchar(20) DEFAULT 'clean',
+    check_in_time timestamp,
+    check_out_time timestamp,
+    current_guest varchar(100),
+    note text
 );
 
-CREATE TABLE IF NOT EXISTS Bookings (
-    booking_id SERIAL PRIMARY KEY,
-    room_id INT,
-    user_id INT,
-    check_in_date DATE NOT NULL,
-    check_out_date DATE NOT NULL,
-    total_price DECIMAL(10, 2) NOT NULL,
-    booking_status VARCHAR(50) DEFAULT 'Confirmed',
-    FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+create table Customer (
+	customer_id uuid primary key,
+	full_name varchar (100) not null,
+	email varchar(100),
+	phone_number varchar(15) not null,
+	address text,
+	nationality varchar(50),
+	date_of_birth date,
+	id_document varchar(50),
+	registration_date timestamp default current_timestamp,
+	note text
 );
 
-CREATE TABLE IF NOT EXISTS Room_Images (
-    image_id SERIAL PRIMARY KEY,
-    room_id INT,
-    image_url VARCHAR(255) NOT NULL,
-    FOREIGN KEY (room_id) REFERENCES Rooms(room_id)
+create table Booking (
+	booking_id uuid primary key,
+	customer_id uuid references Customer(customer_id),
+	room_id uuid references Room(room_id),
+	booking_date timestamp default current_timestamp,
+	check_in_date timestamp not null,
+	check_out_date timestamp not null,
+	total_price decimal (10, 2) not null,
+	status varchar(20) default 'booked',
+	payment_status varchar(20) default 'pending',
+	note text
 );
 
-CREATE TABLE IF NOT EXISTS Reviews (
-    review_id SERIAL PRIMARY KEY,
-    room_id INT,
-    user_id INT,
-    rating INT CHECK (rating >= 1 AND rating <= 5),
-    review_text TEXT,
-    review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+create table Payment(
+	payment_id uuid primary key,
+	booking_id uuid references Booking(booking_id),
+	customer_id uuid references Customer(customer_id),
+	payment_date timestamp default current_timestamp,
+	amount decimal(10, 2) not null,
+	payment_method varchar(50) not null,
+	payment_status varchar(20) default 'pending',
+	note text
 );
 
-CREATE TABLE IF NOT EXISTS Payments (
-    payment_id SERIAL PRIMARY KEY,
-    booking_id INT,
-    payment_date DATE NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    payment_method VARCHAR(50),
-    payment_status VARCHAR(50) DEFAULT 'Paid',
-    FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id)
+create table Employee (
+	employee_id uuid primary key,
+	full_name varchar(100) not null,
+	email varchar(100),
+	phone_number varchar(15) not null,
+	address text,
+	position varchar(50) not null,
+	salary decimal (10, 2) not null,
+	hire_date date not null,
+	date_of_birth date,
+	id_document varchar(50),
+	status varchar(20) default 'active',
+	note text
 );
+
+create table Salary (
+	salary_id uuid primary key,
+	employee_id uuid references Employee(employee_id),
+	base_salary decimal(10, 2) not null check(base_salary >= 0),
+	bonus decimal(10, 2) default 0 check (bonus >= 0),
+	allowance decimal(10, 2) default 0 check (allowance >= 0),
+	deduction decimal (10, 2) default 0 check (deduction >= 0),
+	net_salary decimal(10, 2) not null check(net_salary >= 0),
+	payment_date date not null,
+	note text
+);
+
+-- Add to the table of TypeRoom
+ALTER TABLE TypeRoom 
+	ADD createTime timestamp,
+	ADD createBy varchar(100),
+	ADD updateTime timestamp,
+	ADD updateBy varchar(100),
+	ADD deleteTime timestamp,
+	ADD deleteBy varchar(100);
+
+-- Add to the table of Room
+ALTER TABLE Room
+	ADD createTime timestamp,
+	ADD createBy varchar(100),
+	ADD updateTime timestamp,
+	ADD updateBy varchar(100),
+	ADD deleteTime timestamp,
+	ADD deleteBy varchar(100);
+
+-- Add to the table of Customer
+alter table customer 
+	ADD createTime timestamp,
+	ADD createBy varchar(100),
+	ADD updateTime timestamp,
+	ADD updateBy varchar(100),
+	ADD deleteTime timestamp,
+	ADD deleteBy varchar(100);
+
+-- Add to the table of Booking
+alter table booking
+	ADD createTime timestamp,
+	ADD createBy varchar(100),
+	ADD updateTime timestamp,
+	ADD updateBy varchar(100),
+	ADD deleteTime timestamp,
+	ADD deleteBy varchar(100);
+
+-- Add to the table of Payment
+alter table payment 
+	ADD createTime timestamp,
+	ADD createBy varchar(100),
+	ADD updateTime timestamp,
+	ADD updateBy varchar(100),
+	ADD deleteTime timestamp,
+	ADD deleteBy varchar(100);
+
+-- Add to the table of Employee
+alter table employee 
+	ADD createTime timestamp,
+	ADD createBy varchar(100),
+	ADD updateTime timestamp,
+	ADD updateBy varchar(100),
+	ADD deleteTime timestamp,
+	ADD deleteBy varchar(100);
+
+-- Add to the table of Salary
+alter table salary 
+	ADD createTime timestamp,
+	ADD createBy varchar(100),
+	ADD updateTime timestamp,
+	ADD updateBy varchar(100),
+	ADD deleteTime timestamp,
+	ADD deleteBy varchar(100);
+
+-- Add eployee_id to the booking table
+alter table booking 
+add employee_id uuid references Employee(employee_id);
+
+-- Display column eployee_id
+alter table booking 
+alter column employee_id set not null;
+
+--Delete Customer_Id in Payment Table
+alter table payment 
+drop column customer_id;

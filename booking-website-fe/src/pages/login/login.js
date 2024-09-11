@@ -44,16 +44,16 @@ function Login() {
         <div className="bg-[#99CCFF] w-full h-screen flex justify-center items-center">
             <div className="bg-[white] w-[300px] p-6 rounded-lg shadow-lg">
                 <h1 className="text-2xl text-center mb-2">Login</h1>
-                {error && <p className="text-[14px] text-red-500 mb-2">Phone or password is false. Try again</p>}
+                {error && <p className="text-[14px] text-red-500 mb-2">Email or password is incorrect</p>}
                 <div>
                     <div className="mb-4 relative">
                         <label className="block text-[14px]" htmlFor="username">
-                            Phone
+                            Email
                         </label>
                         <input
                             type="text"
                             required
-                            placeholder="type your phone number"
+                            placeholder="type your phone email"
                             value={userName}
                             onChange={(e) => {
                                 setUserName(e.target.value);

@@ -14,5 +14,8 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "emmet.includeLanguages": {
     "javascript": "javascriptreact"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
   }
 }
