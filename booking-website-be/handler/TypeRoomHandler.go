@@ -32,7 +32,7 @@ func (u *TypeRoomHandler) AddTypeRoom(ctx echo.Context) error {
 		})
 	}
 
-	return ctx.JSON(http.StatusBadRequest, model.Response{
+	return ctx.JSON(http.StatusOK, model.Response{
 		StatusCode: http.StatusOK,
 		Message:    "successful",
 		Data:       req,

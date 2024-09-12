@@ -30,4 +30,11 @@ func (api *Api) SetupRouter() {
 
 	//employee routes
 	api.Echo.POST("employee/create", api.AccountHandler.CreateEmployee)
+
+	//rooms routes
+	api.Echo.GET("rooms", api.RoomHandler.ViewListRoom)
+	api.Echo.GET("rooms/:room_id", api.RoomHandler.ViewDetailRoom)
+	api.Echo.POST("/rooms/add", api.RoomHandler.AddRoom)
+	api.Echo.PUT("/rooms/:room_id/update", api.RoomHandler.UpdateRoom)
+	api.Echo.PUT("/rooms/:room_id/delete", api.RoomHandler.DeleteRoom)
 }
