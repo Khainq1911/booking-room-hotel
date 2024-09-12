@@ -26,21 +26,22 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.CORS())
 
-	CustomerDb := handler.CustomerHandler{
-		Repo: repository.NewCustomerRepo(sql),
-	}
-	AdminDb := handler.AdminHandler{
-		Repo: repository.NewAdminRepo(sql),
+	TypeRoomDb := handler.TypeRoomHandler{
+		TypeRoomRepo: repository.NewTypeRoomRepo(sql),
 	}
 
-	Authen := handler.AccountHandler{
+	AccountHandler := handler.AccountHandler{
 		Repo: repository.NewAccountRepo(sql),
+	}
+
+	RoomDb := handler.RoomHandler{
+		RoomRepo: repository.NewRoomRepo(sql),
 	}
 	api := router.Api{
 		Echo:            e,
-		CustomerHandler: CustomerDb,
-		AdminHandler:    AdminDb,
-		AccountHandler:  Authen,
+		AccountHandler:  AccountHandler,
+		TypeRoomHandler: TypeRoomDb,
+		RoomHandler:     RoomDb,
 	}
 
 	api.SetupRouter()

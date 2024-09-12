@@ -8,18 +8,26 @@ import (
 
 type Api struct {
 	Echo            *echo.Echo
-	CustomerHandler handler.CustomerHandler
-	AdminHandler    handler.AdminHandler
 	AccountHandler  handler.AccountHandler
+	TypeRoomHandler handler.TypeRoomHandler
+	RoomHandler     handler.RoomHandler
 }
 
 func (api *Api) SetupRouter() {
-
+	//customer routes
 	api.Echo.POST("customer/create", api.AccountHandler.CreateCustomer)
 	api.Echo.GET("customers", api.AccountHandler.ViewCusList)
 	api.Echo.GET("customers/:customer_id", api.AccountHandler.ViewCusDetail)
 	api.Echo.PUT("customers/update/:customer_id", api.AccountHandler.UpdateCus)
 	api.Echo.PUT("customers/delete/:customer_id", api.AccountHandler.DeleteCus)
 
+	//typeroom routes
+	api.Echo.POST("typeRoom/add", api.TypeRoomHandler.AddTypeRoom)
+	api.Echo.GET("typeRoom", api.TypeRoomHandler.ViewTypeRoom)
+	api.Echo.GET("typeRoom/:type_id", api.TypeRoomHandler.ViewDetailTypeRoom)
+	api.Echo.PUT("/typeRoom/:type_id/update", api.TypeRoomHandler.UpdateTypeRoom)
+	api.Echo.PUT("/typeRoom/:type_id/delete", api.TypeRoomHandler.DeleteTypeRoom)
+
+	//employee routes
 	api.Echo.POST("employee/create", api.AccountHandler.CreateEmployee)
 }

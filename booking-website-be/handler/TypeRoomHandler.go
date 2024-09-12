@@ -4,19 +4,17 @@ import (
 	"booking-website-be/model"
 	"booking-website-be/repository"
 	"fmt"
-
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-type AccountHandler struct {
-	Repo repository.AccountRepo
+type TypeRoomHandler struct {
+	TypeRoomRepo repository.TypeRoomRepo
 }
 
-// create customer handler
-func (u *AccountHandler) CreateCustomer(ctx echo.Context) error {
-	req := model.CreateCus{}
+func (u *TypeRoomHandler) AddTypeRoom(ctx echo.Context) error {
+	req := model.TypeRoom{}
 
 	if err := ctx.Bind(&req); err != nil {
 		fmt.Println(err)
@@ -26,50 +24,30 @@ func (u *AccountHandler) CreateCustomer(ctx echo.Context) error {
 		})
 	}
 
-	if err := u.Repo.CreateCusRepo(ctx.Request().Context(), req); err != nil {
+	if err := u.TypeRoomRepo.AddTypeRoomRepo(ctx.Request().Context(), req); err != nil {
+		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
 			StatusCode: http.StatusBadRequest,
-			Message:    "failed to create customer",
+			Message:    "failed to add data",
 		})
 	}
 
-	return ctx.JSON(http.StatusOK, model.Response{
+	return ctx.JSON(http.StatusBadRequest, model.Response{
 		StatusCode: http.StatusOK,
 		Message:    "successful",
 		Data:       req,
 	})
-
 }
 
-// view list customers
+// view type room
+func (u *TypeRoomHandler) ViewTypeRoom(ctx echo.Context) error {
 
-func (u *AccountHandler) ViewCusList(ctx echo.Context) error {
-	data, err := u.Repo.ViewCusListRepo(ctx.Request().Context())
+	data, err := u.TypeRoomRepo.ViewtypeRoomRepo(ctx.Request().Context())
 	if err != nil {
 		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
 			StatusCode: http.StatusBadRequest,
-			Message:    "failed to get data",
-		})
-	}
-	return ctx.JSON(http.StatusOK, model.Response{
-		StatusCode: http.StatusOK,
-		Message:    "successful",
-		Data:       data,
-	})
-}
-
-// view detail customer
-func (u *AccountHandler) ViewCusDetail(ctx echo.Context) error {
-
-	customer_id := ctx.Param("customer_id")
-
-	data, err := u.Repo.ViewCusDetailRepo(ctx.Request().Context(), customer_id)
-	if err != nil {
-		fmt.Println(err)
-		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
-			StatusCode: http.StatusBadRequest,
-			Message:    "failed to view customer",
+			Message:    "failed to add data",
 		})
 	}
 
@@ -80,11 +58,32 @@ func (u *AccountHandler) ViewCusDetail(ctx echo.Context) error {
 	})
 }
 
-// update customer
-func (u *AccountHandler) UpdateCus(ctx echo.Context) error {
-	req := model.UpdateCus{}
-	customer_id := ctx.Param("customer_id")
+// view detail type room
+func (u *TypeRoomHandler) ViewDetailTypeRoom(ctx echo.Context) error {
+	typeId := ctx.Param("type_id")
 
+	data, err := u.TypeRoomRepo.ViewDetailtypeRoomRepo(ctx.Request().Context(), typeId)
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to add data",
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, model.Response{
+		StatusCode: http.StatusOK,
+		Message:    "successful",
+		Data:       data,
+	})
+}
+
+//update type room
+
+func (u *TypeRoomHandler) UpdateTypeRoom(ctx echo.Context) error {
+	typeId := ctx.Param("type_id")
+
+	req := model.UpdateTypeRoom{}
 	if err := ctx.Bind(&req); err != nil {
 		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
@@ -93,7 +92,7 @@ func (u *AccountHandler) UpdateCus(ctx echo.Context) error {
 		})
 	}
 
-	if err := u.Repo.UpdateCusRepo(ctx.Request().Context(), customer_id, req); err != nil {
+	if err := u.TypeRoomRepo.UpdateTypeRoomRepo(ctx.Request().Context(), req, typeId); err != nil {
 		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
 			StatusCode: http.StatusBadRequest,
@@ -106,11 +105,11 @@ func (u *AccountHandler) UpdateCus(ctx echo.Context) error {
 		Message:    "successful",
 		Data:       req,
 	})
+
 }
 
-// delete customer
-func (u *AccountHandler) DeleteCus(ctx echo.Context) error {
-	var req model.DeleteCus
+func (u *TypeRoomHandler) DeleteTypeRoom(ctx echo.Context) error {
+	var req model.DeleteTypeRoom
 
 	if err := ctx.Bind(&req); err != nil {
 		fmt.Println(err)
@@ -120,44 +119,13 @@ func (u *AccountHandler) DeleteCus(ctx echo.Context) error {
 		})
 	}
 
-	customer_id := ctx.Param("customer_id")
+	type_id := ctx.Param("type_id")
 
-	if err := u.Repo.DeleteCusRepo(ctx.Request().Context(), customer_id, req); err != nil {
+	if err := u.TypeRoomRepo.DeleteTypeRoomRepo(ctx.Request().Context(), type_id, req); err != nil {
 		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
 			StatusCode: http.StatusBadRequest,
-			Message:    "failed to update customer",
-		})
-	}
-
-	return ctx.JSON(http.StatusOK, model.Response{
-		StatusCode: http.StatusOK,
-		Message:    "successful",
-		Data:       req,
-	})
-}
-
-//create customer by import excel
-
-//EMPLOYEE
-
-// create
-func (u *AccountHandler) CreateEmployee(ctx echo.Context) error {
-	req := model.CreateEmp{}
-
-	if err := ctx.Bind(&req); err != nil {
-		fmt.Println(err)
-		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
-			StatusCode: http.StatusBadRequest,
-			Message:    "failed to bind data",
-		})
-	}
-
-	if err := u.Repo.CreateEmpRepo(ctx.Request().Context(), req); err != nil {
-		fmt.Println(err)
-		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
-			StatusCode: http.StatusBadRequest,
-			Message:    "failed to create employee",
+			Message:    "failed to update type room",
 		})
 	}
 

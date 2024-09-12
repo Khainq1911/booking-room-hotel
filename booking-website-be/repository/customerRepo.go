@@ -5,105 +5,189 @@ import (
 	"booking-website-be/model"
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 )
 
-type CustomerRepo interface {
-	GetAllRoomRepo(ctx context.Context) ([]model.Room, error)
-	SelectRoomRepo(ctx context.Context, room_id int) ([]model.Room, error)
-	BookingRoomRepo(ctx context.Context, booking model.BookingRoom) (model.BookingRoom, error)
-	FilterRoomRepo(ctx context.Context, room_type string, max_guest string, timeIn string, timeOut string) ([]model.Room, error)
+type AccountRepo interface {
+	CreateCusRepo(ctx context.Context, customer model.CreateCus) error
+	CreateEmpRepo(ctx context.Context, employee model.CreateEmp) error
+	ViewCusListRepo(ctx context.Context) ([]model.Customer, error)
+	ViewCusDetailRepo(ctx context.Context, customer_id string) ([]model.Customer, error)
+	UpdateCusRepo(ctx context.Context, customer_id string, customer model.UpdateCus) error
+	DeleteCusRepo(ctx context.Context, customer_id string, deleteBy model.DeleteCus) error
 }
 
-type CustomerRepoDb struct {
-	sql *database.Sql
+type AccountSql struct {
+	Sql *database.Sql
 }
 
-func NewCustomerRepo(sql *database.Sql) CustomerRepo {
-	return &CustomerRepoDb{
-		sql: sql,
+func NewAccountRepo(sql *database.Sql) AccountRepo {
+	return &AccountSql{
+		Sql: sql,
 	}
 }
 
-func (db *CustomerRepoDb) GetAllRoomRepo(ctx context.Context) ([]model.Room, error) {
-	data := []model.Room{}
-	query := `SELECT * FROM Rooms`
+//Customer
 
-	if err := db.sql.Db.Select(&data, query); err != nil {
-		fmt.Println(" loi lay phong tu database", err)
-		return []model.Room{}, err
+// create customer
+func (db *AccountSql) CreateCusRepo(ctx context.Context, customer model.CreateCus) error {
+	query := ` insert into customer (full_name, email, phone_number, address, nationality, date_of_birth,id_document, registration_date, note, createtime, createby)
+				 values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) `
+	current := time.Now()
+
+	if _, err := db.Sql.Db.Exec(query, customer.FullName, customer.Email, customer.PhoneNumber, customer.Address, customer.Nationality, customer.DateOfBirth, customer.IDDocument, customer.RegistrationDate, customer.Note, current, customer.CreateBy); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+// view list customers
+func (db *AccountSql) ViewCusListRepo(ctx context.Context) ([]model.Customer, error) {
+	data := []model.Customer{}
+	query := `select 
+				customer_id, 
+				full_name,
+				email, 
+				phone_number, 
+				address, 
+				nationality, 
+				date_of_birth,
+				id_document, 
+				registration_date, 
+				note from customer`
+	if err := db.Sql.Db.Select(&data, query); err != nil {
+		return []model.Customer{}, err
 	}
 
 	return data, nil
 }
 
-func (db *CustomerRepoDb) SelectRoomRepo(ctx context.Context, room_id int) ([]model.Room, error) {
-	data := []model.Room{}
-	query := `select * from rooms where room_id = $1`
-
-	if err := db.sql.Db.Select(&data, query, room_id); err != nil {
-		fmt.Println("loi lay phong tu database (SelectRoomRepo); ", err)
-		return []model.Room{}, err
+// update customer information
+func (db *AccountSql) ViewCusDetailRepo(ctx context.Context, customer_id string) ([]model.Customer, error) {
+	data := []model.Customer{}
+	query := `	select 
+				customer_id, 
+				full_name,
+				email, 
+				phone_number, 
+				address, 
+				nationality, 
+				date_of_birth,
+				id_document, 
+				registration_date, 
+				note 
+				from customer where customer_id = $1`
+	if err := db.Sql.Db.Select(&data, query, customer_id); err != nil {
+		return []model.Customer{}, err
 	}
 
 	return data, nil
+
 }
 
-func (db *CustomerRepoDb) BookingRoomRepo(ctx context.Context, booking model.BookingRoom) (model.BookingRoom, error) {
-	query := `insert into bookings(room_id, user_id, check_in_date, check_out_date, total_price, booking_status, create_at, update_at) 
-			values ($1, $2, $3, $4, $5, $6, $7, $8)`
-
-	create_at := time.Now()
-	update_at := time.Now()
-
-	_, err := db.sql.Db.Exec(query,
-		booking.Room_id,
-		booking.User_id,
-		booking.CheckInDate,
-		booking.CheckOutDate,
-		booking.TotalPrice,
-		booking.BookingStatus,
-		create_at, update_at)
+func (db *AccountSql) UpdateCusRepo(ctx context.Context, customer_id string, customer model.UpdateCus) error {
+	query := `update customer
+				set full_name = $1,
+				email = $2, 
+				phone_number = $3, 
+				address = $4, 
+				nationality = $5, 
+				date_of_birth = $6,
+				id_document = $7, 
+				registration_date = $8, 
+				updatetime = $9,
+				updateby = $10,
+				note = $11 where customer_id = $12`
+	current := time.Now()
+	result, err := db.Sql.Db.Exec(query,
+		customer.FullName,
+		customer.Email,
+		customer.PhoneNumber,
+		customer.Address,
+		customer.Nationality,
+		customer.DateOfBirth,
+		customer.IDDocument,
+		customer.RegistrationDate,
+		current,
+		customer.UpdateBy,
+		customer.Note,
+		customer_id)
 	if err != nil {
-		fmt.Println("failed to insert data to database at BookingRoomRepo")
-		return model.BookingRoom{}, err
+		return err
 	}
 
-	return booking, nil
+	rowwAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowwAffected == 0 {
+		return fmt.Errorf("column is not exist")
+	}
+
+	return nil
 }
 
-func (db *CustomerRepoDb) FilterRoomRepo(ctx context.Context, room_type string, max_guest string, timeIn string, timeOut string) ([]model.Room, error) {
-	var rooms []model.Room
-	num := 1
-	query := `SELECT * FROM rooms WHERE 1=1`
-	params := []interface{}{}
+// delete customer
+func (db *AccountSql) DeleteCusRepo(ctx context.Context, customer_id string, customer model.DeleteCus) error {
+	query := `update customer
+			set deletetime = $1,
+				deleteby = $2
+			where customer_id = $3`
 
-	if room_type != "all" && room_type != "" {
-		query += (` AND room_type = $` + strconv.Itoa(num))
-		params = append(params, room_type)
-		num += 1
+	current := time.Now()
+
+	result, err := db.Sql.Db.Exec(query, current, customer.DeleteBy, customer_id)
+	if err != nil {
+		return err
 	}
 
-	if max_guest != "all" && max_guest != "" {
-		query += (` AND max_guest <= $` + strconv.Itoa(num))
-		params = append(params, max_guest)
-		num += 1
+	rowwAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowwAffected == 0 {
+		return fmt.Errorf("column is not exist")
 	}
 
-	if timeIn != "all" && timeOut != "all" && timeIn != "" && timeOut != "" {
-		query += ` AND room_id NOT IN (
-			SELECT room_id FROM bookings 
-			WHERE ($` + strconv.Itoa(num) + ` <= check_out_date AND $` + strconv.Itoa(num+1) + ` >= check_in_date)
-		)`
-		params = append(params, timeOut, timeIn)
-		num += 2
-	}
+	return nil
+}
 
-	if err := db.sql.Db.Select(&rooms, query, params...); err != nil {
-		fmt.Println("Failed to filter data", err)
-		return nil, err
-	}
+//employee
 
-	return rooms, nil
+// create employee
+func (db *AccountSql) CreateEmpRepo(ctx context.Context, employee model.CreateEmp) error {
+	query := `  insert into employee (full_name, 
+				email, 
+				phone_number, 
+				address, 
+				position, 
+				salary,
+				hire_date, 
+				date_of_birth,
+				id_document,
+				status, 
+				note, 
+				createtime, 
+				createby) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
+	current := time.Now()
+
+	if _, err := db.Sql.Db.Exec(query,
+		employee.FullName,
+		employee.Email,
+		employee.PhoneNumber,
+		employee.Address,
+		employee.Position,
+		employee.Salary,
+		employee.HireDate,
+		employee.DateOfBirth,
+		employee.IdDocument,
+		employee.Status,
+		employee.Note,
+		current,
+		employee.CreateBy); err != nil {
+		return err
+	}
+	return nil
 }
