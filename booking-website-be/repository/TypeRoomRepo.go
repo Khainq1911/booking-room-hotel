@@ -5,15 +5,17 @@ import (
 	"booking-website-be/model"
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 )
 
 type TypeRoomRepo interface {
 	AddTypeRoomRepo(ctx context.Context, typeRoom model.TypeRoom) error
 	ViewtypeRoomRepo(ctx context.Context) ([]model.SelectTypeRoom, error)
-	ViewDetailtypeRoomRepo(ctx context.Context, typeId string) ([]model.SelectTypeRoom, error)
+	ViewDetailtypeRoomRepo(ctx context.Context, typeId string) ([]model.SelectDetail, error)
 	UpdateTypeRoomRepo(ctx context.Context, data model.UpdateTypeRoom, typeId string) error
 	DeleteTypeRoomRepo(ctx context.Context, typeId string, typeRoom model.DeleteTypeRoom) error
+	FilterTypeRoomRepo(ctx context.Context, TypeName string, max_occupancy string, timeIn string, timeOut string) ([]model.SelectTypeRoom, error)
 }
 
 type Sql struct {
@@ -71,9 +73,9 @@ func (db *Sql) ViewtypeRoomRepo(ctx context.Context) ([]model.SelectTypeRoom, er
 	room_size,
 	image_url,
 	status,
-	discount from typeroom `
+	discount from typeroom where is_deleted = $1`
 
-	if err := db.Sql.Db.Select(&data, query); err != nil {
+	if err := db.Sql.Db.Select(&data, query, false); err != nil {
 		return []model.SelectTypeRoom{}, err
 	}
 
@@ -81,8 +83,10 @@ func (db *Sql) ViewtypeRoomRepo(ctx context.Context) ([]model.SelectTypeRoom, er
 }
 
 // view detail type room
-func (db *Sql) ViewDetailtypeRoomRepo(ctx context.Context, typeId string) ([]model.SelectTypeRoom, error) {
-	data := []model.SelectTypeRoom{}
+func (db *Sql) ViewDetailtypeRoomRepo(ctx context.Context, typeId string) ([]model.SelectDetail, error) {
+	data := []model.SelectDetail{}
+
+	data2 := []model.Room{}
 
 	query := `select type_id,
 	type_name,
@@ -95,8 +99,15 @@ func (db *Sql) ViewDetailtypeRoomRepo(ctx context.Context, typeId string) ([]mod
 	discount from typeroom where type_id = $1`
 
 	if err := db.Sql.Db.Select(&data, query, typeId); err != nil {
-		return []model.SelectTypeRoom{}, err
+		return []model.SelectDetail{}, err
 	}
+
+	query2 := `select room_id, room_name, type_id, floor, status, price_override, cleaning_status, check_in_time, check_out_time, current_guest, note from room where type_id = $1`
+	if err := db.Sql.Db.Select(&data2, query2, typeId); err != nil {
+		return []model.SelectDetail{}, err
+	}
+
+	data[0].Rooms = data2
 
 	return data, nil
 }
@@ -132,11 +143,12 @@ func (db *Sql) DeleteTypeRoomRepo(ctx context.Context, typeId string, typeRoom m
 	query := `update typeroom
 	set deletetime = $1,
 		deleteby = $2
-	where type_id = $3`
+		is_deleted = $3
+	where type_id = $4`
 
 	current := time.Now()
-
-	result, err := db.Sql.Db.Exec(query, current, typeRoom.DeleteBy, typeId)
+	isDeleted := false
+	result, err := db.Sql.Db.Exec(query, current, typeRoom.DeleteBy, isDeleted, typeId)
 	if err != nil {
 		return err
 	}
@@ -153,37 +165,49 @@ func (db *Sql) DeleteTypeRoomRepo(ctx context.Context, typeId string, typeRoom m
 
 }
 
-/* func (db *CustomerRepoDb) FilterRoomRepo(ctx context.Context, room_type string, max_guest string, timeIn string, timeOut string) ([]model.Room, error) {
-	var rooms []model.Room
+func (db *Sql) FilterTypeRoomRepo(ctx context.Context, TypeName string, max_occupancy string, timeIn string, timeOut string) ([]model.SelectTypeRoom, error) {
+	typeRoom := []model.SelectTypeRoom{}
 	num := 1
-	query := `SELECT * FROM rooms WHERE 1=1`
+	query := `SELECT 
+    type_id,
+    type_name,
+    description,
+    price_per_night,
+    max_occupancy,
+    room_size,
+    image_url,
+    status,
+    discount 
+FROM 
+    typeroom `
 	params := []interface{}{}
 
-	if room_type != "all" && room_type != "" {
-		query += (` AND room_type = $` + strconv.Itoa(num))
-		params = append(params, room_type)
+	if TypeName != "all" && TypeName != "" {
+		query += (` AND typename = $` + strconv.Itoa(num))
+		params = append(params, TypeName)
 		num += 1
 	}
 
-	if max_guest != "all" && max_guest != "" {
-		query += (` AND max_guest <= $` + strconv.Itoa(num))
-		params = append(params, max_guest)
+	if max_occupancy != "all" && max_occupancy != "" {
+		query += (` AND max_occupancy <= $` + strconv.Itoa(num))
+		params = append(params, max_occupancy)
 		num += 1
 	}
 
 	if timeIn != "all" && timeOut != "all" && timeIn != "" && timeOut != "" {
-		query += ` AND room_id NOT IN (
-			SELECT room_id FROM bookings
-			WHERE ($` + strconv.Itoa(num) + ` <= check_out_date AND $` + strconv.Itoa(num+1) + ` >= check_in_date)
+		query += ` AND type_id NOT IN (
+			SELECT type_id FROM room
+			WHERE ($` + strconv.Itoa(num) + ` <= check_out_time AND $` + strconv.Itoa(num+1) + ` >= check_in_time)
 		)`
 		params = append(params, timeOut, timeIn)
 		num += 2
 	}
 
-	if err := db.sql.Db.Select(&rooms, query, params...); err != nil {
-		fmt.Println("Failed to filter data", err)
+	fmt.Println(query)
+
+	if err := db.Sql.Db.Select(&typeRoom, query, params...); err != nil {
 		return nil, err
 	}
 
-	return rooms, nil
-} */
+	return typeRoom, nil
+}

@@ -67,7 +67,7 @@ func (u *TypeRoomHandler) ViewDetailTypeRoom(ctx echo.Context) error {
 		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
 			StatusCode: http.StatusBadRequest,
-			Message:    "failed to add data",
+			Message:    "failed to view data",
 		})
 	}
 
@@ -133,5 +133,29 @@ func (u *TypeRoomHandler) DeleteTypeRoom(ctx echo.Context) error {
 		StatusCode: http.StatusOK,
 		Message:    "successful",
 		Data:       req,
+	})
+}
+
+//filter type room
+
+func (u *TypeRoomHandler) FilterTypeRoom(ctx echo.Context) error {
+	typeName := ctx.QueryParam("type-name")
+	maxOccupancy := ctx.QueryParam("max_occupancy")
+	checkInTime := ctx.QueryParam("check_in_time")
+	checkOutTime := ctx.QueryParam("check_out_time")
+
+	data, err := u.TypeRoomRepo.FilterTypeRoomRepo(ctx.Request().Context(), typeName, maxOccupancy, checkInTime, checkOutTime)
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to filter data",
+		})
+	}
+
+	return ctx.JSON(http.StatusBadRequest, model.Response{
+		StatusCode: http.StatusOK,
+		Message:    "successful",
+		Data:       data,
 	})
 }

@@ -130,11 +130,13 @@ func (db *RoomSql) DeleteRoomRepo(ctx context.Context, roomId string, Room model
 	query := `update room
 	set deletetime = $1,
 		deleteby = $2
-	where room_id = $3`
+		is_deleted = $3
+	where room_id = $4`
 
 	current := time.Now()
+	isDeleted := false
 
-	result, err := db.Sql.Db.Exec(query, current, Room.DeleteBy, roomId)
+	result, err := db.Sql.Db.Exec(query, current, Room.DeleteBy, isDeleted, roomId)
 	if err != nil {
 		return err
 	}

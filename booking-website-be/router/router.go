@@ -27,6 +27,7 @@ func (api *Api) SetupRouter() {
 	api.Echo.GET("typeRoom/:type_id", api.TypeRoomHandler.ViewDetailTypeRoom)
 	api.Echo.PUT("/typeRoom/:type_id/update", api.TypeRoomHandler.UpdateTypeRoom)
 	api.Echo.PUT("/typeRoom/:type_id/delete", api.TypeRoomHandler.DeleteTypeRoom)
+	api.Echo.GET("/typeRoom/filter", api.TypeRoomHandler.FilterTypeRoom)
 
 	//employee routes
 	api.Echo.POST("employee/create", api.AccountHandler.CreateEmployee)

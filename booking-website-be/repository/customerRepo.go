@@ -63,7 +63,7 @@ func (db *AccountSql) ViewCusListRepo(ctx context.Context) ([]model.Customer, er
 	return data, nil
 }
 
-// update customer information
+// view customer information
 func (db *AccountSql) ViewCusDetailRepo(ctx context.Context, customer_id string) ([]model.Customer, error) {
 	data := []model.Customer{}
 	query := `	select 
@@ -86,6 +86,7 @@ func (db *AccountSql) ViewCusDetailRepo(ctx context.Context, customer_id string)
 
 }
 
+// update customer information
 func (db *AccountSql) UpdateCusRepo(ctx context.Context, customer_id string, customer model.UpdateCus) error {
 	query := `update customer
 				set full_name = $1,
