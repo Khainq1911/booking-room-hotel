@@ -11,6 +11,10 @@ type Api struct {
 	AccountHandler  handler.AccountHandler
 	TypeRoomHandler handler.TypeRoomHandler
 	RoomHandler     handler.RoomHandler
+	BookingHandler  handler.BookingHandler
+	EmployeeHandler handler.EmployeeHandler
+	SalaryHandler   handler.SalaryHandler
+	PaymentHandler  handler.PaymentHandler
 }
 
 func (api *Api) SetupRouter() {
@@ -30,7 +34,11 @@ func (api *Api) SetupRouter() {
 	api.Echo.GET("/typeRoom/filter", api.TypeRoomHandler.FilterTypeRoom)
 
 	//employee routes
-	api.Echo.POST("employee/create", api.AccountHandler.CreateEmployee)
+	api.Echo.POST("employee/create", api.EmployeeHandler.CreateEmployee)
+	api.Echo.GET("/employee", api.EmployeeHandler.ViewListEmp)
+	api.Echo.GET("/employee/:employee_id", api.EmployeeHandler.ViewDetailEmp)
+	api.Echo.PUT("/employee/:employee_id/update", api.EmployeeHandler.UpdateEmp)
+	api.Echo.PUT("/employee/:employee_id/delete", api.EmployeeHandler.DeleteEmp)
 
 	//rooms routes
 	api.Echo.GET("rooms", api.RoomHandler.ViewListRoom)
@@ -38,4 +46,7 @@ func (api *Api) SetupRouter() {
 	api.Echo.POST("/rooms/add", api.RoomHandler.AddRoom)
 	api.Echo.PUT("/rooms/:room_id/update", api.RoomHandler.UpdateRoom)
 	api.Echo.PUT("/rooms/:room_id/delete", api.RoomHandler.DeleteRoom)
+
+	//booking
+	api.Echo.POST("/booking/create", api.BookingHandler.CreateBooking)
 }

@@ -37,11 +37,31 @@ func main() {
 	RoomDb := handler.RoomHandler{
 		RoomRepo: repository.NewRoomRepo(sql),
 	}
+
+	bookingDb := handler.BookingHandler{
+		BookingRepo: repository.NewBookingRepo(sql),
+	}
+
+	salaryDb := handler.SalaryHandler{
+		Repo: repository.NewSalaryRepo(sql),
+	}
+
+	employeeDb := handler.EmployeeHandler{
+		EmployeeRepo: repository.NewEmployeeRepo(sql),
+	}
+
+	paymentDb := handler.PaymentHandler{
+		Repo: repository.NewPaymentRepo(sql),
+	}
 	api := router.Api{
 		Echo:            e,
 		AccountHandler:  AccountHandler,
 		TypeRoomHandler: TypeRoomDb,
 		RoomHandler:     RoomDb,
+		BookingHandler:  bookingDb,
+		SalaryHandler:   salaryDb,
+		EmployeeHandler: employeeDb,
+		PaymentHandler:  paymentDb,
 	}
 
 	api.SetupRouter()

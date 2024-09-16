@@ -10,7 +10,6 @@ import (
 
 type AccountRepo interface {
 	CreateCusRepo(ctx context.Context, customer model.CreateCus) error
-	CreateEmpRepo(ctx context.Context, employee model.CreateEmp) error
 	ViewCusListRepo(ctx context.Context) ([]model.Customer, error)
 	ViewCusDetailRepo(ctx context.Context, customer_id string) ([]model.Customer, error)
 	UpdateCusRepo(ctx context.Context, customer_id string, customer model.UpdateCus) error
@@ -152,43 +151,5 @@ func (db *AccountSql) DeleteCusRepo(ctx context.Context, customer_id string, cus
 		return fmt.Errorf("column is not exist")
 	}
 
-	return nil
-}
-
-//employee
-
-// create employee
-func (db *AccountSql) CreateEmpRepo(ctx context.Context, employee model.CreateEmp) error {
-	query := `  insert into employee (full_name, 
-				email, 
-				phone_number, 
-				address, 
-				position, 
-				salary,
-				hire_date, 
-				date_of_birth,
-				id_document,
-				status, 
-				note, 
-				createtime, 
-				createby) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
-	current := time.Now()
-
-	if _, err := db.Sql.Db.Exec(query,
-		employee.FullName,
-		employee.Email,
-		employee.PhoneNumber,
-		employee.Address,
-		employee.Position,
-		employee.Salary,
-		employee.HireDate,
-		employee.DateOfBirth,
-		employee.IdDocument,
-		employee.Status,
-		employee.Note,
-		current,
-		employee.CreateBy); err != nil {
-		return err
-	}
 	return nil
 }
