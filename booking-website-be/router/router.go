@@ -49,4 +49,8 @@ func (api *Api) SetupRouter() {
 
 	//booking
 	api.Echo.POST("/booking/create", api.BookingHandler.CreateBooking)
+	api.Echo.GET("/booking", api.BookingHandler.ViewListBooking)
+	api.Echo.GET("/booking/:booking_id", api.BookingHandler.ViewDetailBooking)
+	api.Echo.PUT("/booking/:booking_id/cancel", api.BookingHandler.CancelBooking)
+
 }
