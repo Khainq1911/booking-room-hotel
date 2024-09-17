@@ -58,4 +58,10 @@ func (api *Api) SetupRouter() {
 	api.Echo.GET("/salary", api.SalaryHandler.ViewListSalary)
 	api.Echo.GET("/salary/:salary_id", api.SalaryHandler.ViewDetailSalary)
 	api.Echo.PUT("/salary/:salary_id/update", api.SalaryHandler.UpdateSalary)
+
+	//payment
+	api.Echo.POST("/payment/create", api.PaymentHandler.CreatePayment)
+	api.Echo.GET("/payment", api.PaymentHandler.ViewListPayment)
+	api.Echo.GET("/payment/:payment_id", api.PaymentHandler.ViewDetailPayment)
+	api.Echo.PUT("/payment/:payment_id/update", api.PaymentHandler.UpdatePayment)
 }
