@@ -53,4 +53,9 @@ func (api *Api) SetupRouter() {
 	api.Echo.GET("/booking/:booking_id", api.BookingHandler.ViewDetailBooking)
 	api.Echo.PUT("/booking/:booking_id/cancel", api.BookingHandler.CancelBooking)
 
+	//salary
+	api.Echo.POST("/salary/create", api.SalaryHandler.CreateSalary)
+	api.Echo.GET("/salary", api.SalaryHandler.ViewListSalary)
+	api.Echo.GET("/salary/:salary_id", api.SalaryHandler.ViewDetailSalary)
+	api.Echo.PUT("/salary/:salary_id/update", api.SalaryHandler.UpdateSalary)
 }
