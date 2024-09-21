@@ -50,3 +50,13 @@ type UpdateEmp struct {
 type DeleteEmp struct {
 	DeleteBy string `json:"deleteby" db:"deleteby"`
 }
+
+type Login struct {
+	EmployeeID string `json:"employee_id" db:"employee_id"`
+	PassWord   string `json:"password" db:"password"`
+	IsAdmin    bool   `json:"is_admin" db:"is_admin"`
+}
+type User struct {
+	PhoneNumber string `json:"phone_number" db:"phone_number"`
+	PassWord    string `json:"password" db:"password"`
+}

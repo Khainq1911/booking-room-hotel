@@ -14,6 +14,7 @@ type EmployeeRepo interface {
 	ViewDetailEmpRepo(ctx context.Context, employeeId string) ([]model.Employee, error)
 	UpdateEmpRepo(ctx context.Context, employee_id string, employee model.UpdateEmp) error
 	DeleteEmpRepo(ctx context.Context, employee_id string, model model.DeleteEmp) error
+	CheckLogin(ctx context.Context, phone_number string) ([]model.Login, error)
 }
 
 type EmployeeSql struct {
@@ -119,4 +120,16 @@ func (db *EmployeeSql) DeleteEmpRepo(ctx context.Context, employee_id string, mo
 	}
 
 	return nil
+}
+
+// login
+func (db *EmployeeSql) CheckLogin(ctx context.Context, phone_number string) ([]model.Login, error) {
+	data := []model.Login{}
+	query := `select employee_id, password, is_admin from employee where phone_number = $1`
+
+	if err := db.Sql.Db.Select(&data, query, phone_number); err != nil {
+		return []model.Login{}, err
+	}
+
+	return data, nil
 }

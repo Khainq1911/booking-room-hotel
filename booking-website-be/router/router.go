@@ -2,7 +2,9 @@ package router
 
 import (
 	"booking-website-be/handler"
+	"booking-website-be/middleware"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,12 +20,17 @@ type Api struct {
 }
 
 func (api *Api) SetupRouter() {
+	adminGroup := api.Echo.Group("/admin")
+	adminGroup.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte("Ftghghttfhgt44"),
+	}))
+	adminGroup.Use(middleware.AdminMiddleware)
 	//customer routes
-	api.Echo.POST("customer/create", api.AccountHandler.CreateCustomer)
-	api.Echo.GET("customers", api.AccountHandler.ViewCusList)
-	api.Echo.GET("customers/:customer_id", api.AccountHandler.ViewCusDetail)
-	api.Echo.PUT("customers/update/:customer_id", api.AccountHandler.UpdateCus)
-	api.Echo.PUT("customers/delete/:customer_id", api.AccountHandler.DeleteCus)
+	api.Echo.POST("/customer/create", api.AccountHandler.CreateCustomer)
+	adminGroup.GET("/customers", api.AccountHandler.ViewCusList)
+	api.Echo.GET("/customers/:customer_id", api.AccountHandler.ViewCusDetail)
+	api.Echo.PUT("/customers/update/:customer_id", api.AccountHandler.UpdateCus)
+	api.Echo.PUT("/customers/delete/:customer_id", api.AccountHandler.DeleteCus)
 
 	//typeroom routes
 	api.Echo.POST("typeRoom/add", api.TypeRoomHandler.AddTypeRoom)
@@ -64,4 +71,6 @@ func (api *Api) SetupRouter() {
 	api.Echo.GET("/payment", api.PaymentHandler.ViewListPayment)
 	api.Echo.GET("/payment/:payment_id", api.PaymentHandler.ViewDetailPayment)
 	api.Echo.PUT("/payment/:payment_id/update", api.PaymentHandler.UpdatePayment)
+
+	api.Echo.POST("/login", api.EmployeeHandler.CheckLogin)
 }

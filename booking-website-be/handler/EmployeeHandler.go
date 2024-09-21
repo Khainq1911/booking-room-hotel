@@ -3,9 +3,12 @@ package handler
 import (
 	"booking-website-be/model"
 	"booking-website-be/repository"
+	"booking-website-be/security"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -136,4 +139,51 @@ func (u *EmployeeHandler) DeleteEmp(ctx echo.Context) error {
 		Message:    "successful",
 		Data:       req,
 	})
+}
+
+func (u *EmployeeHandler) CheckLogin(ctx echo.Context) error {
+	req := model.User{}
+
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to bind data",
+		})
+	}
+
+	data, err := u.EmployeeRepo.CheckLogin(ctx.Request().Context(), req.PhoneNumber)
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to delete data",
+		})
+	}
+
+	if req.PassWord != data[0].PassWord {
+		return ctx.JSON(http.StatusUnauthorized, model.ResWithOutData{
+			StatusCode: http.StatusUnauthorized,
+			Message:    "failed to delete data",
+		})
+	}
+
+	claims := jwt.MapClaims{
+		"employee_id": data[0].EmployeeID,
+		"is_admin":    data[0].IsAdmin,
+		"exp":         time.Now().Add(time.Hour * 2).Unix(),
+	}
+
+	token, err := security.GenToken(&claims, ctx.Echo().AcquireContext())
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusBadRequest, model.ResWithOutData{
+			StatusCode: http.StatusBadRequest,
+			Message:    "failed to gentoken",
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, echo.Map{
+		"token": token,
+	})
+
 }
