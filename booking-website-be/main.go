@@ -25,7 +25,7 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.CORS())
-	
+
 	TypeRoomDb := handler.TypeRoomHandler{
 		TypeRoomRepo: repository.NewTypeRoomRepo(sql),
 	}

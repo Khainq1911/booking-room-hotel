@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -13,9 +12,9 @@ func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		reqToken := c.Request().Header.Get("authorization")
 		token := strings.Split(reqToken, " ")[1]
-		fmt.Println(token)
+
 		claims := jwt.MapClaims{}
-		fmt.Println(claims)
+
 		_, err := jwt.ParseWithClaims(token, claims, func(*jwt.Token) (interface{}, error) {
 			return []byte("Ftghghttfhgt44"), nil
 		})
